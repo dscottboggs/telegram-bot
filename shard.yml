@@ -1,0 +1,17 @@
+name: madsci_telegram_bot
+version: 0.1.0
+
+authors:
+  - D. Scott Boggs <scott@tams.tech>
+
+targets:
+  madsci_telegram_bot:
+    main: src/madsci_telegram_bot.cr
+
+dependencies:
+  telegram_bot:
+    github: hangyas/telegram_bot
+
+crystal: 0.27.0
+
+license: MIT
