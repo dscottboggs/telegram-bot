@@ -24,15 +24,17 @@ module MadsciTelegramBot::ShoppingListInterface
     # split the remainder of the message on newlines and append those lines
     # to the list at the key represented by the first word after the command
     case list_name = command.shift?
-    when "help" then puts_help
-    when nil    then "you must specify a list"
-    else
-      list = command.join(" ").split("\n").reject &.empty?
-      unless @@list[list_name]?.try &.concat list
-        @@list[list_name] = list
-      end
-      OK_RESPONSE
+    when nil    then return "you must specify a list"
+    when "help" then return help_message
+    when .includes? '\n'
+      list_name, first_entry = list_name.split "\n", limit: 2
+      command.unshift first_entry
     end
+    list = command.join(" ").split("\n").reject &.empty?
+    unless @@list[list_name]?.try &.concat list
+      @@list[list_name] = list
+    end
+    OK_RESPONSE
   end
 
   def get(command)
@@ -49,11 +51,11 @@ module MadsciTelegramBot::ShoppingListInterface
 
   def delete(command)
     if (list_name = command.shift?).try { |list| !list.empty? }
-      return "list #{list_name} not found" unless @@list.includes? list_name
+      return "list #{list_name} not found" unless @@list.has_key? list_name
       if command.empty?
         @@list.delete list_name
       else
-        command.each do |entry|
+        command.join(" ").split("\n").each do |entry|
           @@list[list_name].try &.delete(entry)
         end
       end
@@ -63,7 +65,7 @@ module MadsciTelegramBot::ShoppingListInterface
     end
   end
 
-  def puts_help
+  def help_message
     <<-HELP_MSG
       There are three commands to the shopping list module:
         - `/list [LIST_NAME]`
@@ -90,8 +92,14 @@ module MadsciTelegramBot::ShoppingListInterface
         it works just like
     HELP_MSG
   end
-  {% if Configuration::Environ.testing? %}
-    # test methods
-    
-  {% end %}
+  # {% if ENVIRONMENT == Environ::Testing %}
+  # todo make inaccessible outside of testing
+  # test methods
+  def list=(other)
+    @@list = other
+  end
+  def list
+    @@list
+  end
+  # {% end %}
 end

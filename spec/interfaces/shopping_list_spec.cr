@@ -1,5 +1,5 @@
 require "json"
-
+require "../spec_helper"
 def new_message(text)
   JSON::PullParser.new({
     message_id: rand(0..Int32::MAX),
@@ -18,7 +18,7 @@ def handle(command_text)
     TelegramBot::Message.new(new_message text: command_text))
 end
 
-module MadsciTelegramBot::ShoppingListInterface
+module MadsciTelegramBot::ShoppingListInterfaceSpec
   describe MadsciTelegramBot::ShoppingListInterface do
     context "/need" do
       context "no more values" do
@@ -29,15 +29,15 @@ module MadsciTelegramBot::ShoppingListInterface
       context "food milk" do
         it "adds milk to the list" do
           handle("/need food milk").should eq MadsciTelegramBot::Configuration::OK_RESPONSE
-          @@list["food"]?.should eq ["milk"]
-          @@list.delete "food"
+          MadsciTelegramBot::ShoppingListInterface.list["food"]?.should eq ["milk"]
+          MadsciTelegramBot::ShoppingListInterface.list.delete "food"
         end
       end
       context "food\\nmilk\\neggs" do
         it "adds milk and eggs to the list" do
           handle("/need food\nmilk\neggs").should eq MadsciTelegramBot::Configuration::OK_RESPONSE
-          @@list["food"]?.should eq ["milk", "eggs"]
-          @@list.delete "food"
+          MadsciTelegramBot::ShoppingListInterface.list["food"]?.should eq ["milk", "eggs"]
+          MadsciTelegramBot::ShoppingListInterface.list.delete "food"
         end
       end
     end
@@ -48,8 +48,8 @@ module MadsciTelegramBot::ShoppingListInterface
         end
       end
       context "food" do
-        it "responds with the contents of the list at the key \"food\" in @@list" do
-          @@list["food"] = ["bread"]
+        it "responds with the contents of the list at the key \"food\" in list" do
+          MadsciTelegramBot::ShoppingListInterface.list["food"] = ["bread"]
           handle("/list food").should eq "bread\n#{MadsciTelegramBot::Configuration::OK_RESPONSE}"
         end
       end
@@ -62,14 +62,14 @@ module MadsciTelegramBot::ShoppingListInterface
       end
       context "food" do
         it "deletes the whole list" do
-          @@list["food"] = ["bread"]
+          MadsciTelegramBot::ShoppingListInterface.list["food"] = ["bread"]
           handle("/have food").should eq MadsciTelegramBot::Configuration::OK_RESPONSE
-          @@list["food"]?.should be_nil
+          MadsciTelegramBot::ShoppingListInterface.list["food"]?.should be_nil
         end
         it "deletes one element from the list" do
-          @@list["food"] = ["peanut butter", "jelly"]
+          MadsciTelegramBot::ShoppingListInterface.list["food"] = ["peanut butter", "jelly"]
           handle("/have food peanut butter").should eq MadsciTelegramBot::Configuration::OK_RESPONSE
-          @@list["food"].should eq ["jelly"]
+          MadsciTelegramBot::ShoppingListInterface.list["food"].should eq ["jelly"]
         end
       end
     end

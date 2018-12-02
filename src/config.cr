@@ -12,6 +12,7 @@ module MadsciTelegramBot
     TEST_CHAT_ID = 431418362
     SECRET_FILE  = "SECRET"
     OK_RESPONSE  = "\u{1F44D}\u{1F44C}"
+    ENVIRONMENT = Environ.current
 
     def self.api_token
       @@api_token ||= File.read("API_TOKEN").strip
