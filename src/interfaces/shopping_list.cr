@@ -38,7 +38,7 @@ module MadsciTelegramBot::ShoppingListInterface
       {% for command, method in VALID_COMMANDS %}
       when {{command}} then {{method.id}} command
       {% end %}
-      else              "invalid command"
+      else              "invalid command. see `/need help` for more information."
       end
       {% end %}
     else
@@ -49,6 +49,7 @@ module MadsciTelegramBot::ShoppingListInterface
   def add(command)
     # split the remainder of the message on newlines and append those lines
     # to the list at the key represented by the first word after the command
+    list_name = uninitialized String?
     case list_name = command.shift?
     when nil    then return "you must specify a list. For usage info use `/need help`"
     when "help" then return HELP_MESSAGE
@@ -76,13 +77,13 @@ module MadsciTelegramBot::ShoppingListInterface
   end
 
   def delete(command)
-    if (list_name = command.shift?).try { |list| !list.empty? }
+    if (list_name = command.shift?) && !list_name.empty?
       return "list #{list_name} not found" unless @@list.has_key? list_name
       if command.empty?
         @@list.delete list_name
       else
         command.join(" ").split("\n").each do |entry|
-          @@list[list_name].try &.delete(entry)
+          @@list[list_name]?.try &.delete(entry)
         end
       end
       OK_RESPONSE
@@ -92,6 +93,7 @@ module MadsciTelegramBot::ShoppingListInterface
   end
   # {% if ENVIRONMENT == Environ::Testing %}
   # todo make inaccessible outside of testing
+
   # test methods
   def list=(other)
     @@list = other

@@ -5,3 +5,5 @@
 *.dwarf
 SECRET
 API_TOKEN
+
+test.db

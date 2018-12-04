@@ -1,5 +1,13 @@
 version: 1.0
 shards:
+  db:
+    github: crystal-lang/crystal-db
+    version: 0.5.1
+
+  sqlite3:
+    github: crystal-lang/crystal-sqlite3
+    version: 0.10.0
+
   telegram_bot:
     github: hangyas/telegram_bot
     commit: 50a4976ed04ebe16315dd6b1d3e3c22cc442051a
