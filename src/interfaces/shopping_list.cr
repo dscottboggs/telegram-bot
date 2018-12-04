@@ -1,8 +1,34 @@
+
 module MadsciTelegramBot::ShoppingListInterface
   include MadsciTelegramBot::Configuration
   extend self
   @@list = Hash(String, Array(String)).new
   VALID_COMMANDS = {"/need" => :add, "/list" => :get, "/have" => :delete}
+  HELP_MESSAGE = <<-HERE
+  There are three commands to the shopping list module:
+    - `/list [LIST_NAME]`
+  Returns the contents of the list named LIST_NAME
+    - `/need [LIST_NAME] [newline-separated LIST_CONTENTS]`
+  Adds the contents of a list to the list named LIST_NAME. You can add one
+  item simply like so:
+  `/need food cookies`
+  or multiple by putting a newline between them:
+  ```
+  /need food milk
+  cookies
+  ```
+  or:
+  ```
+  /need food
+  ice cream
+  cheese pizza
+  ```
+    - `/have [LIST_NAME] [optional newline-separated LIST_CONTENTS]`
+  Removes the given items from the list, returning them if there are any
+  left. As a shortcut, if no LIST_CONTENTS are specified, you'll be
+  asked to verify and the whole list will be deleted. Other than that,
+  it works just like /need.
+  HERE
 
   def handle(message : TelegramBot::Message) : String
     if command = message.text.try &.split(' ')
@@ -24,8 +50,8 @@ module MadsciTelegramBot::ShoppingListInterface
     # split the remainder of the message on newlines and append those lines
     # to the list at the key represented by the first word after the command
     case list_name = command.shift?
-    when nil    then return "you must specify a list"
-    when "help" then return help_message
+    when nil    then return "you must specify a list. For usage info use `/need help`"
+    when "help" then return HELP_MESSAGE
     when .includes? '\n'
       list_name, first_entry = list_name.split "\n", limit: 2
       command.unshift first_entry
@@ -63,34 +89,6 @@ module MadsciTelegramBot::ShoppingListInterface
     else
       "you must specify a list"
     end
-  end
-
-  def help_message
-    <<-HELP_MSG
-      There are three commands to the shopping list module:
-        - `/list [LIST_NAME]`
-      Returns the contents of the list named LIST_NAME
-        - `/need [LIST_NAME] [newline-separated LIST_CONTENTS]`
-      Adds the contents of a list to the list named LIST_NAME. You can add one
-      item simply like so:
-      `/need food cookies`
-       or multiple by putting a newline between them:
-       ```
-       /need food milk
-       cookies
-       ```
-       or:
-       ```
-       /need food
-       ice cream
-       cheese pizza
-       ```
-        - `/have [LIST_NAME] [optional newline-separated LIST_CONTENTS]`
-        Removes the given items from the list, returning them if there are any
-        left. As a shortcut, if no LIST_CONTENTS are specified, you'll be
-        asked to verify and the whole list will be deleted. Other than that,
-        it works just like
-    HELP_MSG
   end
   # {% if ENVIRONMENT == Environ::Testing %}
   # todo make inaccessible outside of testing
