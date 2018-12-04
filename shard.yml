@@ -11,8 +11,8 @@ targets:
 dependencies:
   telegram_bot:
     github: hangyas/telegram_bot
-  sqlite3:
-    github: crystal-lang/crystal-sqlite3
+  pg:
+    github: will/crystal-pg
 
 crystal: 0.27.0
 

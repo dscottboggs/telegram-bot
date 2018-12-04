@@ -1,3 +1,4 @@
+require "./shopping_list/lists_hash"
 
 module MadsciTelegramBot::ShoppingListInterface
   include MadsciTelegramBot::Configuration

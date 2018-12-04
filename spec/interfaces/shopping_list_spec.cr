@@ -23,7 +23,7 @@ module MadsciTelegramBot::ShoppingListInterfaceSpec
     context "/need" do
       context "no more values" do
         it "responds with an error" do
-          handle("/need").should eq "you must specify a list"
+          handle("/need").should eq "you must specify a list. For usage info use `/need help`"
         end
       end
       context "food milk" do

@@ -14,6 +14,9 @@ module MadsciTelegramBot
     OK_RESPONSE  = "\u{1F44D}\u{1F44C}"
     ENVIRONMENT = Environ.current
 
+    POSTGRES_URL = File.read("POSTGRES_URL").chomp
+    DB_NAME = "ms_tg_bot"
+
     def self.api_token
       @@api_token ||= File.read("API_TOKEN").strip
     end

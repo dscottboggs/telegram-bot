@@ -7,3 +7,4 @@ SECRET
 API_TOKEN
 
 test.db
+POSTGRES_URL

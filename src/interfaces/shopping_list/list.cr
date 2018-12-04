@@ -3,9 +3,11 @@ class MadsciTelegramBot::ShoppingListInterface::List
   property contents = {} of Int32 => String
   property db_id : Int32
   @deleted = false
-  delegate :size, :each, :map, :join to: @contents.values
+  {% for method in {:size, :each, :map, :join} %}
+  delegate {{method.id}}, to: @contents.values
+  {%end%}
   def initialize(@name, @contents = {} of Int32 => String)
-    db_id = query("\
+    @db_id = query("\
       SELECT id FROM lists \
       WHERE lists.name = #{@name};").read
     if contents = @contents
@@ -87,11 +89,11 @@ class MadsciTelegramBot::ShoppingListInterface::List
 
   private def exec(string)
     check_deletion
-    DB.open @database_url &.exec string
+    DB.open(@database_url) { |db| db.exec string }
   end
   private def query(string)
     check_deletion
-    DB.open @database_url &.query string
+    DB.open(@database_url) { |db| db.query string }
   end
   private macro check_deletion
     raise MadsciTelegramBot::ShoppingListInterface::UseAfterFree.new(@name) if @deleted
