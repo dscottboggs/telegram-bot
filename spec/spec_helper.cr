@@ -6,5 +6,5 @@ TEST_LIST_NAME     = "__test_list"
 TEST_LIST_CONTENTS = ["one", "two", "three", "four"]
 
 def clear_redis
-  MadsciTelegramBot::Configuration.redis.del TEST_LIST_NAME
+  MadsciTelegramBot::Configuration::REDIS.del TEST_LIST_NAME
 end

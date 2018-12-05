@@ -1,4 +1,5 @@
 struct MadsciTelegramBot::ShoppingListInterface::List
+  include Configuration
   property name : String
   property contents : Set(String)
   def_equals_and_hash :name, :contents
@@ -10,7 +11,7 @@ struct MadsciTelegramBot::ShoppingListInterface::List
 
   # overload to persist changes in redis
   def concat(other : Array(String))
-    Configuration.redis.sadd key: name, values: other
+    REDIS.sadd key: name, values: other
   end
 
   def delete(*entries)
@@ -18,6 +19,6 @@ struct MadsciTelegramBot::ShoppingListInterface::List
   end
 
   def delete(entries : Array(String))
-    Configuration.redis.srem key: name, values: entries
+    REDIS.srem key: name, values: entries
   end
 end

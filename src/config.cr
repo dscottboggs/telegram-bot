@@ -17,10 +17,14 @@ module MadsciTelegramBot
     OK_RESPONSE       = "\u{1F44D}\u{1F44C}"
     ENVIRONMENT       = Environ.current
     REDIS_SOCKET_ADDR = "/var/run/redis/redis.sock"
-
-    def self.redis
-      @@redis ||= Redis.new unixsocket: REDIS_SOCKET_ADDR
-    end
+    REDIS_URL         = ENV["REDIS_URL"]?
+    REDIS_HOST        = REDIS_URL.try &.rpartition(":").first
+    REDIS_PORT        = REDIS_URL.try &.rpartition(":").last
+    REDIS             = if REDIS_URL
+                          Redis.new host: REDIS_HOST.not_nil!, port: REDIS_PORT.not_nil!.to_i
+                        else
+                          Redis.new unixsocket: REDIS_SOCKET_ADDR
+                        end
 
     def self.api_token
       @@api_token ||= File.read("API_TOKEN").strip

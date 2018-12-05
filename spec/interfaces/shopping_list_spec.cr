@@ -43,8 +43,8 @@ module MadsciTelegramBot::ShoppingListInterfaceSpec
           MadsciTelegramBot::ShoppingListInterface
             .list[TEST_LIST_NAME]?
             .should eq MadsciTelegramBot::ShoppingListInterface::List.new(
-              name: TEST_LIST_NAME,
-              contents: TEST_LIST_CONTENTS[0..1])
+            name: TEST_LIST_NAME,
+            contents: TEST_LIST_CONTENTS[0..1])
           MadsciTelegramBot::ShoppingListInterface.list.delete TEST_LIST_NAME
           clear_redis
         end
