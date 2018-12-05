@@ -1,0 +1,25 @@
+version: '3.7'
+
+services:
+  bot:
+    build: .
+    networks:
+      - internal
+      - web
+    environment:
+      REDIS_URL: redis:6379
+  redis:
+    image: redis:alpine
+    command: redis-server --appendonly yes
+    volumes:
+      - type: bind
+        source: ./redis
+        target: /data
+    networks:
+      - internal
+
+networks:
+  internal:
+    internal: true
+  web:
+    external: true
