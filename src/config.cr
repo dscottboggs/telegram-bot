@@ -1,7 +1,10 @@
+require "redis"
+
 module MadsciTelegramBot
   module Configuration
     @@secret : String?
     @@api_token : String?
+    @@redis : Redis?
     IP_ADDR   = "0.0.0.0"
     PORT      = 80
     LOG_LEVEL = if Environ.production?
@@ -9,10 +12,15 @@ module MadsciTelegramBot
                 else
                   Logger::DEBUG
                 end
-    TEST_CHAT_ID = 431418362
-    SECRET_FILE  = "SECRET"
-    OK_RESPONSE  = "\u{1F44D}\u{1F44C}"
-    ENVIRONMENT = Environ.current
+    TEST_CHAT_ID      = 431418362
+    SECRET_FILE       = "SECRET"
+    OK_RESPONSE       = "\u{1F44D}\u{1F44C}"
+    ENVIRONMENT       = Environ.current
+    REDIS_SOCKET_ADDR = "/var/run/redis/redis.sock"
+
+    def self.redis
+      @@redis ||= Redis.new unixsocket: REDIS_SOCKET_ADDR
+    end
 
     def self.api_token
       @@api_token ||= File.read("API_TOKEN").strip

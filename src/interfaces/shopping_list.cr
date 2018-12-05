@@ -1,10 +1,12 @@
+require "./shopping_list/errors"
+require "./shopping_list/lists_hash"
 
 module MadsciTelegramBot::ShoppingListInterface
   include MadsciTelegramBot::Configuration
   extend self
-  @@list = Hash(String, Array(String)).new
+  @@list = ListsHash.new
   VALID_COMMANDS = {"/need" => :add, "/list" => :get, "/have" => :delete}
-  HELP_MESSAGE = <<-HERE
+  HELP_MESSAGE   = <<-HERE
   There are three commands to the shopping list module:
     - `/list [LIST_NAME]`
   Returns the contents of the list named LIST_NAME
@@ -72,7 +74,7 @@ module MadsciTelegramBot::ShoppingListInterface
         "list #{list_name} not found"
       end
     else
-      "you must specify a list"
+      "you must specify a list. See `/need help` for usage information."
     end
   end
 
@@ -82,15 +84,18 @@ module MadsciTelegramBot::ShoppingListInterface
       if command.empty?
         @@list.delete list_name
       else
-        command.join(" ").split("\n").each do |entry|
-          @@list[list_name]?.try &.delete(entry)
+        if list = @@list[list_name]?
+          list.delete(command.join(" ").split("\n"))
+        else
+          return "list not found"
         end
       end
       OK_RESPONSE
     else
-      "you must specify a list"
+      "you must specify a list. See `/need help` for usage information."
     end
   end
+
   # {% if ENVIRONMENT == Environ::Testing %}
   # todo make inaccessible outside of testing
 
@@ -98,6 +103,7 @@ module MadsciTelegramBot::ShoppingListInterface
   def list=(other)
     @@list = other
   end
+
   def list
     @@list
   end

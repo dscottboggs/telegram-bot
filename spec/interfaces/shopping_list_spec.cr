@@ -1,5 +1,6 @@
 require "json"
 require "../spec_helper"
+
 def new_message(text)
   JSON::PullParser.new({
     message_id: rand(0..Int32::MAX),
@@ -23,53 +24,69 @@ module MadsciTelegramBot::ShoppingListInterfaceSpec
     context "/need" do
       context "no more values" do
         it "responds with an error" do
-          handle("/need").should eq "you must specify a list"
+          handle("/need").should eq "you must specify a list. For usage info use `/need help`"
         end
       end
-      context "food milk" do
-        it "adds milk to the list" do
-          handle("/need food milk").should eq MadsciTelegramBot::Configuration::OK_RESPONSE
-          MadsciTelegramBot::ShoppingListInterface.list["food"]?.should eq ["milk"]
-          MadsciTelegramBot::ShoppingListInterface.list.delete "food"
+      context "#{TEST_LIST_NAME} #{TEST_LIST_CONTENTS[0]}" do
+        it "adds #{TEST_LIST_CONTENTS[0]} to the list" do
+          clear_redis
+          handle("/need #{TEST_LIST_NAME} #{TEST_LIST_CONTENTS[0]}").should eq MadsciTelegramBot::Configuration::OK_RESPONSE
+          MadsciTelegramBot::ShoppingListInterface.list[TEST_LIST_NAME]?.should eq MadsciTelegramBot::ShoppingListInterface::List.new name: TEST_LIST_NAME, contents: [TEST_LIST_CONTENTS[0]]
+          MadsciTelegramBot::ShoppingListInterface.list.delete TEST_LIST_NAME
+          clear_redis
         end
       end
-      context "food\\nmilk\\neggs" do
-        it "adds milk and eggs to the list" do
-          handle("/need food\nmilk\neggs").should eq MadsciTelegramBot::Configuration::OK_RESPONSE
-          MadsciTelegramBot::ShoppingListInterface.list["food"]?.should eq ["milk", "eggs"]
-          MadsciTelegramBot::ShoppingListInterface.list.delete "food"
+      context "#{TEST_LIST_NAME}\\n#{TEST_LIST_CONTENTS[0]}\\n#{TEST_LIST_CONTENTS[1]}" do
+        it "adds #{TEST_LIST_CONTENTS[0]} and #{TEST_LIST_CONTENTS[1]} to the list" do
+          clear_redis
+          handle("/need #{TEST_LIST_NAME}\n#{TEST_LIST_CONTENTS[0]}\n#{TEST_LIST_CONTENTS[1]}").should eq MadsciTelegramBot::Configuration::OK_RESPONSE
+          MadsciTelegramBot::ShoppingListInterface
+            .list[TEST_LIST_NAME]?
+            .should eq MadsciTelegramBot::ShoppingListInterface::List.new(
+              name: TEST_LIST_NAME,
+              contents: TEST_LIST_CONTENTS[0..1])
+          MadsciTelegramBot::ShoppingListInterface.list.delete TEST_LIST_NAME
+          clear_redis
         end
       end
     end
     context "/list" do
       context "no list specified" do
         it "responds with an error message" do
-          handle("/list").should eq "you must specify a list"
+          handle("/list").should eq "you must specify a list. See `/need help` for usage information."
         end
       end
-      context "food" do
-        it "responds with the contents of the list at the key \"food\" in list" do
-          MadsciTelegramBot::ShoppingListInterface.list["food"] = ["bread"]
-          handle("/list food").should eq "bread\n#{MadsciTelegramBot::Configuration::OK_RESPONSE}"
+      context TEST_LIST_NAME do
+        it "responds with the contents of the list at the key \"#{TEST_LIST_NAME}\" in list" do
+          clear_redis
+          MadsciTelegramBot::ShoppingListInterface.list[TEST_LIST_NAME] = ["bread"]
+          handle("/list #{TEST_LIST_NAME}").should eq "bread\n#{MadsciTelegramBot::Configuration::OK_RESPONSE}"
+          clear_redis
         end
       end
     end
     context "/have" do
       context "no list specified" do
         it "responds with an error" do
-          handle("/have").should eq "you must specify a list"
+          handle("/have").should eq "you must specify a list. See `/need help` for usage information."
         end
       end
-      context "food" do
+      context TEST_LIST_NAME do
         it "deletes the whole list" do
-          MadsciTelegramBot::ShoppingListInterface.list["food"] = ["bread"]
-          handle("/have food").should eq MadsciTelegramBot::Configuration::OK_RESPONSE
-          MadsciTelegramBot::ShoppingListInterface.list["food"]?.should be_nil
+          clear_redis
+          MadsciTelegramBot::ShoppingListInterface.list[TEST_LIST_NAME] = ["bread"]
+          handle("/have #{TEST_LIST_NAME}").should eq MadsciTelegramBot::Configuration::OK_RESPONSE
+          MadsciTelegramBot::ShoppingListInterface.list[TEST_LIST_NAME]?.should be_nil
+          clear_redis
         end
         it "deletes one element from the list" do
-          MadsciTelegramBot::ShoppingListInterface.list["food"] = ["peanut butter", "jelly"]
-          handle("/have food peanut butter").should eq MadsciTelegramBot::Configuration::OK_RESPONSE
-          MadsciTelegramBot::ShoppingListInterface.list["food"].should eq ["jelly"]
+          clear_redis
+          MadsciTelegramBot::ShoppingListInterface.list[TEST_LIST_NAME] = ["peanut butter", "jelly"]
+          handle("/have #{TEST_LIST_NAME} peanut butter").should eq MadsciTelegramBot::Configuration::OK_RESPONSE
+          MadsciTelegramBot::ShoppingListInterface
+            .list[TEST_LIST_NAME]?
+            .should eq MadsciTelegramBot::ShoppingListInterface::List.new name: TEST_LIST_NAME, contents: ["jelly"]
+          clear_redis
         end
       end
     end
